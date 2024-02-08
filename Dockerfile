@@ -8,6 +8,9 @@ WORKDIR /service
 # открываем порт
 EXPOSE 8000
 
+# устанавливаем зависимость между БД и приложением (3 пакета)
+RUN apk add postgresql-client build-base postgresql-dev
+
 RUN pip install -r /temp/requirements.txt
 
 # создаст пользователя в операционнной системе

@@ -9,9 +9,26 @@ services:
     volumes:
     # локальную папку подключили внутрь контейнера (локальная папка / внутри контейнера)
       - ./service:/service
-
+    environment:
+      - DB_HOST=database
+      - DB_NAME=service_db
+      - DB_USER=alekseikogan
+      - DB_PASS=StelsDelta200
     # команда для запуска django сервера внутри докера
     # sh -c это шел линукса для запуска
     # 0.0.0.0 - значит все IP-адреса
     command: >
       sh -c "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - database
+    
+  
+  database:
+    image: postgres:14.6-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=service_db
+      - POSTGRES_USER=alekseikogan
+      - POSTGRES_PASSWORD=StelsDelta200
+      
