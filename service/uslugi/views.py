@@ -9,6 +9,7 @@ class SubscriptionView(ReadOnlyModelViewSet):
         'client', 'plan').only(
             'client__company_name',
             'plan__plan_type',
+            'plan__discount_percent'
             ).prefetch_related('client__user')
     # queryset = Subscription.objects.all().prefetch_related(
     #     Prefetch(
