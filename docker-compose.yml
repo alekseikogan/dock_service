@@ -1,4 +1,5 @@
 # то из чего будут создаваться контейнеры
+# https://saasitive.com/tutorial/django-celery-redis-postgres-docker-compose/
 services:
   web:
     build:
@@ -31,4 +32,22 @@ services:
       - POSTGRES_DB=service_db
       - POSTGRES_USER=alekseikogan
       - POSTGRES_PASSWORD=StelsDelta200
-      
+    
+  redis:
+    image: redis:7.0.5-alpine
+    hostname: redis
+
+  worker:
+    build:
+      context: .
+    hostname: celery
+    entrypoint: celery
+    command: -A celery_app.app worker --loglevel=info
+    volumes:
+    # потому что работать будет с Django
+      - ./service:/service
+    links: 
+      - redis
+    depends_on:
+      - redis
+  
