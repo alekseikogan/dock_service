@@ -44,6 +44,19 @@ class Plan(models.Model):
         verbose_name = 'План'
         verbose_name_plural = 'Планы'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # сохраняем как выглядел размер скидки в момент создания Плана
+        self.__discount_percent = self.discount_percent
+
+    def save(self, *args, **kwargs):
+        # если значение скидки изменилось, то пересчитываем цены
+        if self.discount_percent != self.__discount_percent:
+            for subscription in self.subscriptions.all():
+                count_price.delay(subscription.id)
+
+        return super().save(*args, **kwargs)
+    
     def __str__(self):
         return f'{self.plan_type} - {self.discount_percent}%'
 
@@ -73,11 +86,6 @@ class Subscription(models.Model):
         db_table = 'subscriptions'
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
-    
-    def save(self, *args, save_model=True, **kwargs):
-        if save_model:
-            count_price.delay(self.id)
-        return super().save(*args, **kwargs)
 
     def __str__(self):
         return f'{self.client} - {self.service} - {self.plan}'

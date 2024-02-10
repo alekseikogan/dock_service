@@ -7,4 +7,4 @@ def count_price(subscription_id):
     subscription = Subscription.objects.get(id=subscription_id)
     sell_price = subscription.service.price * (1 - subscription.plan.discount_percent / 100.00)
     subscription.price = sell_price
-    subscription.save(save_model=False)
+    subscription.save()
