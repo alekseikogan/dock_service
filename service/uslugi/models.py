@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator
 
 from clients.models import Client
+from .tasks import count_price
 
 class Service(models.Model):
     name = models.CharField(
@@ -64,11 +65,19 @@ class Subscription(models.Model):
         on_delete=models.PROTECT,
         related_name='subscriptions',
         verbose_name='План')
+    price = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Факстическая стоимость')
 
     class Meta:
         db_table = 'subscriptions'
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
     
+    def save(self, *args, save_model=True, **kwargs):
+        if save_model:
+            count_price.delay(self.id)
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return f'{self.client} - {self.service} - {self.plan}'

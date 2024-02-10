@@ -50,11 +50,19 @@ services:
       - redis
     depends_on:
       - redis
+      - database
+    environment:
+      - DB_HOST=database
+      - DB_NAME=service_db
+      - DB_USER=alekseikogan
+      - DB_PASS=StelsDelta200
     
   flower:
     build:
       context: .
     hostname: flower
+    ports:
+      - '5555:5555'
     entrypoint: celery
     command: -A celery_app.app flower
     volumes:
@@ -64,6 +72,5 @@ services:
       - redis
     depends_on:
       - redis
-    ports:
-      - '5555:5555'
+    
   
