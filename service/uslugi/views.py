@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from django.db.models import Prefetch, F, Sum
+from django.db.models import Prefetch, Sum
 from .serializers import SubscriptionSerializer
 from .models import Subscription, Client
 
@@ -19,7 +19,6 @@ class SubscriptionView(ReadOnlyModelViewSet):
                 'user__username',
                 'company_name')
         ))
-    # ).annotate(price=F('service__price') * (1 - F('plan__discount_percent') / 100.00))
     serializer_class = SubscriptionSerializer
 
     # вот так лущче не делать, но если бизнес-логика требует
