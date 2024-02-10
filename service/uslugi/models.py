@@ -19,6 +19,19 @@ class Service(models.Model):
         verbose_name = 'Сервис'
         verbose_name_plural = 'Сервисы'
     
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # сохраняем как выглядел размер скидки в момент создания Плана
+        self.__price = self.price
+
+    def save(self, *args, **kwargs):
+        # если значение скидки изменилось, то пересчитываем цены
+        if self.price != self.__price:
+            for subscription in self.subscriptions.all():
+                count_price.delay(subscription.id)
+
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
