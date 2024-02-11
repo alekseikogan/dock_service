@@ -11,13 +11,9 @@ def count_price(subscription_id):
     from .models import Subscription
 
     with transaction.atomic():
-        time.sleep(5)
-
-        subscription = Subscription.objects.select_for_upadate().filter(id=subscription_id).annotate(
+        subscription = Subscription.objects.select_for_update().filter(id=subscription_id).annotate(
             annotated_price=F('service__price') * (1 - F('plan__discount_percent') / 100.00)).first()
         
-        time.sleep(10)
-
         subscription.price = subscription.annotated_price
         subscription.save()
 
@@ -28,8 +24,7 @@ def set_comment(subscription_id):
 
     with transaction.atomic():
         # возьмет первым Подписку и не даст никому пользоваться
-        subscription = Subscription.objects.select_for_upadate().get(id=subscription_id)
-        time.sleep(18)
+        subscription = Subscription.objects.select_for_update().get(id=subscription_id)
 
         subscription.comment = str(datetime.datetime.now())
         subscription.save()
