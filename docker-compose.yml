@@ -37,10 +37,30 @@ services:
     image: redis:7.0.5-alpine
     hostname: redis
 
-  worker:
+  worker1:
     build:
       context: .
-    hostname: celery
+    hostname: worker1
+    entrypoint: celery
+    command: -A celery_app.app worker --loglevel=info
+    volumes:
+    # потому что работать будет с Django
+      - ./service:/service
+    links:
+      - redis
+    depends_on:
+      - redis
+      - database
+    environment:
+      - DB_HOST=database
+      - DB_NAME=service_db
+      - DB_USER=alekseikogan
+      - DB_PASS=StelsDelta200
+    
+  worker2:
+    build:
+      context: .
+    hostname: worker2
     entrypoint: celery
     command: -A celery_app.app worker --loglevel=info
     volumes:

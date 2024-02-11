@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import MaxValueValidator
 
 from clients.models import Client
-from .tasks import count_price
+from .tasks import count_price, set_comment
 
 class Service(models.Model):
     name = models.CharField(
@@ -29,6 +29,7 @@ class Service(models.Model):
         if self.price != self.__price:
             for subscription in self.subscriptions.all():
                 count_price.delay(subscription.id)
+                set_comment.delay(subscription.id)
 
         return super().save(*args, **kwargs)
 
@@ -63,10 +64,11 @@ class Plan(models.Model):
         self.__discount_percent = self.discount_percent
 
     def save(self, *args, **kwargs):
-        # если значение скидки изменилось, то пересчитываем цены
+        # если значение скидки изменилось, то пересчитываем цены и коммент
         if self.discount_percent != self.__discount_percent:
             for subscription in self.subscriptions.all():
                 count_price.delay(subscription.id)
+                set_comment.delay(subscription.id)
 
         return super().save(*args, **kwargs)
     
@@ -94,6 +96,7 @@ class Subscription(models.Model):
     price = models.PositiveIntegerField(
         default=0,
         verbose_name='Факстическая стоимость')
+    comment = models.CharField(max_length=250, verbose_name='Комментарий', blank=True)   
 
     class Meta:
         db_table = 'subscriptions'
