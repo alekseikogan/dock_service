@@ -3,6 +3,7 @@ from django.db.models import Prefetch, Sum
 from .serializers import SubscriptionSerializer
 from .models import Subscription, Client
 from django.core.cache import cache
+from django.conf import PRICE_CACHE_NAME
 
 class SubscriptionView(ReadOnlyModelViewSet):
     # queryset = Subscription.objects.all().prefetch_related(
@@ -27,13 +28,12 @@ class SubscriptionView(ReadOnlyModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())
         response = super().list(request, *args, **kwargs)
 
-        price_cache_name = 'price_cache'
-        price_cache = cache.get('price_cache')
+        price_cache = cache.get(PRICE_CACHE_NAME)
         if price_cache:
             total_price_amount = price_cache
         else:
             total_price_amount = queryset.aggregate(total=Sum('price'))['total']
-            cache.set(price_cache_name, total_price_amount, 10)
+            cache.set(PRICE_CACHE_NAME, total_price_amount, 60 * 60)
 
         response_data = {'result': response.data}
         response_data['total_price'] = total_price_amount

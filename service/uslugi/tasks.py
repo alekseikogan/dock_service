@@ -1,9 +1,10 @@
 import datetime
 from celery import shared_task
 from celery_singleton import Singleton
-from django.db.models import F
 from django.db import transaction
-
+from django.db.models import F
+from django.conf import PRICE_CACHE_NAME
+from django.core.cache import cache
 
 @shared_task(base=Singleton)
 def count_price(subscription_id):
@@ -16,6 +17,8 @@ def count_price(subscription_id):
         
         subscription.price = subscription.annotated_price
         subscription.save()
+    
+    cache.delete(PRICE_CACHE_NAME)
 
 
 @shared_task(base=Singleton)
@@ -29,3 +32,5 @@ def set_comment(subscription_id):
         subscription.comment = str(datetime.datetime.now())
         subscription.save()
         # после осободит запись Подписки с данным ID
+    
+    cache.delete(PRICE_CACHE_NAME)
