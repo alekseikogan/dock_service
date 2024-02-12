@@ -35,7 +35,7 @@ class SubscriptionView(ReadOnlyModelViewSet):
             total_price_amount = queryset.aggregate(total=Sum('price'))['total']
             cache.set(PRICE_CACHE_NAME, total_price_amount, 60 * 60)
 
-        response_data = {'result': response.data}
-        response_data['total_price'] = total_price_amount
+        response_data = {'total_price': total_price_amount}
+        response_data['result'] = response.data
         response.data = response_data
         return response
