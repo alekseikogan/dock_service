@@ -3,8 +3,8 @@ from celery import shared_task
 from celery_singleton import Singleton
 from django.db import transaction
 from django.db.models import F
-from django.conf import PRICE_CACHE_NAME
 from django.core.cache import cache
+from service.settings import PRICE_CACHE_NAME
 
 @shared_task(base=Singleton)
 def count_price(subscription_id):

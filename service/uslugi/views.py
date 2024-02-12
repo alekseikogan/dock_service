@@ -3,7 +3,7 @@ from django.db.models import Prefetch, Sum
 from .serializers import SubscriptionSerializer
 from .models import Subscription, Client
 from django.core.cache import cache
-from django.conf import PRICE_CACHE_NAME
+from service.settings import PRICE_CACHE_NAME
 
 class SubscriptionView(ReadOnlyModelViewSet):
     # queryset = Subscription.objects.all().prefetch_related(

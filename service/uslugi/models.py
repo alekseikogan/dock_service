@@ -1,3 +1,4 @@
+from typing import Iterable
 from django.db import models
 from django.core.validators import MaxValueValidator
 
@@ -105,3 +106,12 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.client} - {self.service} - {self.plan}'
+    
+    def save(self, *args, **kwargs):
+        creating = not bool(self.id) # если нет ID, то это новая запись
+        result = super().save(*args, **kwargs)
+        
+        if creating:
+            count_price.delay(self.id)
+
+        return result
