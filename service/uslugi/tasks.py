@@ -1,13 +1,13 @@
 import datetime
-import time
 from celery import shared_task
 from celery_singleton import Singleton
 from django.db.models import F
 from django.db import transaction
 
+
 @shared_task(base=Singleton)
 def count_price(subscription_id):
-    '''A task that counts the price for a subscription based on the given subscription ID.'''
+    '''Counts the price for a subscription based on the given subscription ID.'''
     from .models import Subscription
 
     with transaction.atomic():
