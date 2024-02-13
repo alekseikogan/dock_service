@@ -1,10 +1,11 @@
-from django.db import models
+from clients.models import Client
 from django.core.validators import MaxValueValidator
+from django.db import models
 from django.db.models.signals import post_delete
 
-from clients.models import Client
 from .receivers import delete_subscription
 from .tasks import count_price, set_comment
+
 
 class Service(models.Model):
     name = models.CharField(
@@ -20,7 +21,7 @@ class Service(models.Model):
         db_table = 'services'
         verbose_name = 'Сервис'
         verbose_name_plural = 'Сервисы'
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # сохраняем как выглядел размер скидки в момент создания Плана
@@ -59,7 +60,7 @@ class Plan(models.Model):
         db_table = 'plans'
         verbose_name = 'План'
         verbose_name_plural = 'Планы'
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # сохраняем как выглядел размер скидки в момент создания Плана
@@ -73,7 +74,7 @@ class Plan(models.Model):
                 set_comment.delay(subscription.id)
 
         return super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return f'{self.plan_type} - {self.discount_percent}%'
 
@@ -98,7 +99,10 @@ class Subscription(models.Model):
     price = models.PositiveIntegerField(
         default=0,
         verbose_name='Факстическая стоимость')
-    comment = models.CharField(max_length=250, verbose_name='Комментарий', blank=True)   
+    comment = models.CharField(
+        max_length=250,
+        verbose_name='Комментарий',
+        blank=True)
 
     class Meta:
         db_table = 'subscriptions'
@@ -107,11 +111,11 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f'{self.client} - {self.service} - {self.plan}'
-    
+
     def save(self, *args, **kwargs):
-        creating = not bool(self.id) # если нет ID, то это новая запись
+        creating = not bool(self.id)  # если нет ID, то это новая запись
         result = super().save(*args, **kwargs)
-        
+
         if creating:
             count_price.delay(self.id)
 

@@ -1,9 +1,12 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
-from django.db.models import Prefetch, Sum
-from .serializers import SubscriptionSerializer
-from .models import Subscription, Client
 from django.core.cache import cache
+from django.db.models import Prefetch, Sum
+from rest_framework.viewsets import ReadOnlyModelViewSet
+
 from service.settings import PRICE_CACHE_NAME
+
+from .models import Client, Subscription
+from .serializers import SubscriptionSerializer
+
 
 class SubscriptionView(ReadOnlyModelViewSet):
     # queryset = Subscription.objects.all().prefetch_related(
@@ -22,7 +25,7 @@ class SubscriptionView(ReadOnlyModelViewSet):
         ))
     serializer_class = SubscriptionSerializer
 
-    # вот так лущче не делать, но если бизнес-логика требует
+    # вот так лучше не делать, но если бизнес-логика требует
     # тут можно будет использовать кэширование total_price
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
